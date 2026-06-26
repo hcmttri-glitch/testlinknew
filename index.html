@@ -1,26 +1,151 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-<meta charset="utf-8">
-<title>Đang chuyển hướng...</title>
-
-<script>
-setTimeout(function() {
-    window.location.href = "https://phuclong.com.vn";
-}, 3000);
-</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xác minh người dùng</title>
 
 <style>
 body{
     font-family: Arial, sans-serif;
+    background:#f5f5f5;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+
+.box{
+    width:350px;
+    background:#fff;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
     text-align:center;
-    padding-top:100px;
+}
+
+h2{
+    margin-top:0;
+}
+
+.question{
+    font-size:26px;
+    font-weight:bold;
+    margin:20px 0;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    font-size:18px;
+    text-align:center;
+    border:1px solid #ccc;
+    border-radius:8px;
+    box-sizing:border-box;
+}
+
+button{
+    margin-top:15px;
+    width:100%;
+    padding:12px;
+    font-size:16px;
+    background:#28a745;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#218838;
+}
+
+#error{
+    color:red;
+    margin-top:15px;
 }
 </style>
 
 </head>
 <body>
-<h2>Đang chuyển đến website...</h2>
-<p>Vui lòng chờ 3 giây.</p>
+
+<div class="box">
+    <h2>Xác minh bạn là con người</h2>
+
+    <div class="question" id="question"></div>
+
+    <input
+        type="number"
+        id="answer"
+        placeholder="Nhập kết quả"
+        autocomplete="off">
+
+    <button onclick="checkAnswer()">Xác minh</button>
+
+    <div id="error"></div>
+</div>
+
+<script>
+
+let correctAnswer;
+
+function randomQuestion(){
+
+    const a = Math.floor(Math.random()*10)+1;
+    const b = Math.floor(Math.random()*10)+1;
+
+    const operators = ["+","-"];
+
+    const op = operators[Math.floor(Math.random()*operators.length)];
+
+    if(op==="+"){
+        correctAnswer = a+b;
+    }else{
+
+        // tránh kết quả âm
+        if(a>=b){
+            correctAnswer=a-b;
+            document.getElementById("question").innerHTML=`${a} - ${b} = ?`;
+            return;
+        }else{
+            correctAnswer=b-a;
+            document.getElementById("question").innerHTML=`${b} - ${a} = ?`;
+            return;
+        }
+    }
+
+    document.getElementById("question").innerHTML=`${a} + ${b} = ?`;
+}
+
+function checkAnswer(){
+
+    const value=parseInt(document.getElementById("answer").value);
+
+    if(value===correctAnswer){
+
+        window.location.href="https://phuclong.com.vn/";
+
+    }else{
+
+        document.getElementById("error").innerHTML="Sai rồi. Hãy thử lại.";
+
+        document.getElementById("answer").value="";
+
+        randomQuestion();
+    }
+
+}
+
+document.getElementById("answer").addEventListener("keypress",function(e){
+    if(e.key==="Enter"){
+        checkAnswer();
+    }
+});
+
+randomQuestion();
+
+</script>
+
 </body>
 </html>
