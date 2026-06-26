@@ -7,30 +7,30 @@
 
 <style>
 body{
-    font-family: Arial, sans-serif;
-    background:#f5f5f5;
+    margin:0;
+    height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
-    margin:0;
+    background:#f5f5f5;
+    font-family:Arial,sans-serif;
 }
 
 .box{
-    width:350px;
     background:#fff;
-    padding:30px;
+    padding:35px;
     border-radius:12px;
-    box-shadow:0 5px 15px rgba(0,0,0,.15);
+    box-shadow:0 5px 20px rgba(0,0,0,.1);
     text-align:center;
+    width:320px;
 }
 
 h2{
     margin-top:0;
 }
 
-.question{
-    font-size:26px;
+#question{
+    font-size:30px;
     font-weight:bold;
     margin:20px 0;
 }
@@ -40,8 +40,6 @@ input{
     padding:12px;
     font-size:18px;
     text-align:center;
-    border:1px solid #ccc;
-    border-radius:8px;
     box-sizing:border-box;
 }
 
@@ -49,21 +47,17 @@ button{
     margin-top:15px;
     width:100%;
     padding:12px;
-    font-size:16px;
-    background:#28a745;
+    font-size:18px;
+    cursor:pointer;
+    background:#007bff;
     color:#fff;
     border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#218838;
+    border-radius:6px;
 }
 
 #error{
     color:red;
-    margin-top:15px;
+    margin-top:10px;
 }
 </style>
 
@@ -72,78 +66,71 @@ button:hover{
 
 <div class="box">
     <h2>Xác minh bạn là con người</h2>
+    <p>Vui lòng giải phép tính sau:</p>
 
-    <div class="question" id="question"></div>
+    <div id="question"></div>
 
-    <input
-        type="number"
-        id="answer"
-        placeholder="Nhập kết quả"
-        autocomplete="off">
+    <input type="number" id="answer" placeholder="Nhập kết quả">
 
-    <button onclick="checkAnswer()">Xác minh</button>
+    <button onclick="checkAnswer()">Xác nhận</button>
 
     <div id="error"></div>
 </div>
 
 <script>
 
-let correctAnswer;
+let correctAnswer = 0;
 
-function randomQuestion(){
+// Các phép tính có kết quả từ 2 đến 5
+const questions = [
+    [1,1,'+'], //2
+    [1,2,'+'], //3
+    [2,2,'+'], //4
+    [2,3,'+'], //5
+    [3,1,'-'], //2
+    [4,1,'-'], //3
+    [5,1,'-'], //4
+    [5,3,'-']  //2
+];
 
-    const a = Math.floor(Math.random()*10)+1;
-    const b = Math.floor(Math.random()*10)+1;
+function generateQuestion(){
 
-    const operators = ["+","-"];
+    const q = questions[Math.floor(Math.random()*questions.length)];
 
-    const op = operators[Math.floor(Math.random()*operators.length)];
+    document.getElementById("question").innerHTML =
+        `${q[0]} ${q[2]} ${q[1]} = ?`;
 
-    if(op==="+"){
-        correctAnswer = a+b;
-    }else{
+    correctAnswer = q[2] === "+"
+        ? q[0]+q[1]
+        : q[0]-q[1];
 
-        // tránh kết quả âm
-        if(a>=b){
-            correctAnswer=a-b;
-            document.getElementById("question").innerHTML=`${a} - ${b} = ?`;
-            return;
-        }else{
-            correctAnswer=b-a;
-            document.getElementById("question").innerHTML=`${b} - ${a} = ?`;
-            return;
-        }
-    }
-
-    document.getElementById("question").innerHTML=`${a} + ${b} = ?`;
+    document.getElementById("answer").value="";
+    document.getElementById("error").innerHTML="";
 }
 
 function checkAnswer(){
 
-    const value=parseInt(document.getElementById("answer").value);
+    const value = Number(document.getElementById("answer").value);
 
-    if(value===correctAnswer){
+    if(value === correctAnswer){
 
-        window.location.href="https://www.highlandscoffee.com.vn/";
+        window.location.href="https://phuclong.com.vn/";
 
     }else{
 
-        document.getElementById("error").innerHTML="Sai rồi. Hãy thử lại.";
+        document.getElementById("error").innerHTML="Sai rồi, vui lòng thử lại.";
+        generateQuestion();
 
-        document.getElementById("answer").value="";
-
-        randomQuestion();
     }
-
 }
+
+generateQuestion();
 
 document.getElementById("answer").addEventListener("keypress",function(e){
     if(e.key==="Enter"){
         checkAnswer();
     }
 });
-
-randomQuestion();
 
 </script>
 
