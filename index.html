@@ -3,135 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Xác minh người dùng</title>
+<title>Xác minh</title>
 
 <style>
 body{
-    margin:0;
-    height:100vh;
+    font-family:Arial,sans-serif;
     display:flex;
     justify-content:center;
     align-items:center;
+    height:100vh;
     background:#f5f5f5;
-    font-family:Arial,sans-serif;
 }
 
 .box{
-    background:#fff;
-    padding:35px;
+    background:white;
+    padding:30px;
     border-radius:12px;
-    box-shadow:0 5px 20px rgba(0,0,0,.1);
-    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,.1);
     width:320px;
-}
-
-h2{
-    margin-top:0;
-}
-
-#question{
-    font-size:30px;
-    font-weight:bold;
-    margin:20px 0;
 }
 
 input{
     width:100%;
     padding:12px;
-    font-size:18px;
-    text-align:center;
+    margin:10px 0;
     box-sizing:border-box;
 }
 
 button{
-    margin-top:15px;
     width:100%;
     padding:12px;
-    font-size:18px;
-    cursor:pointer;
-    background:#007bff;
-    color:#fff;
     border:none;
-    border-radius:6px;
+    background:#007bff;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
 }
 
-#error{
-    color:red;
-    margin-top:10px;
+button:hover{
+    background:#0056b3;
+}
+
+/* Honeypot */
+.hp{
+    position:absolute;
+    left:-9999px;
+    opacity:0;
 }
 </style>
-
 </head>
+
 <body>
 
 <div class="box">
-    <h2>Xác minh bạn là con người</h2>
-    <p>Vui lòng giải phép tính sau:</p>
+<h2>Xác minh</h2>
 
-    <div id="question"></div>
+<form id="verifyForm">
 
-    <input type="number" id="answer" placeholder="Nhập kết quả">
+    <!-- Honeypot -->
+    <input
+        class="hp"
+        type="text"
+        name="website"
+        autocomplete="off"
+        tabindex="-1">
 
-    <button onclick="checkAnswer()">Xác nhận</button>
+    <p>Nhấn nút bên dưới để tiếp tục.</p>
 
-    <div id="error"></div>
+    <button type="submit">Tiếp tục</button>
+
+</form>
 </div>
 
 <script>
+document.getElementById("verifyForm").addEventListener("submit", function(e){
 
-let correctAnswer = 0;
+    e.preventDefault();
 
-// Các phép tính có kết quả từ 2 đến 5
-const questions = [
-    [1,1,'+'], //2
-    [1,2,'+'], //3
-    [2,2,'+'], //4
-    [2,3,'+'], //5
-    [3,1,'-'], //2
-    [4,1,'-'], //3
-    [5,1,'-'], //4
-    [5,3,'-']  //2
-];
+    const honeypot = document.querySelector('input[name="website"]');
 
-function generateQuestion(){
-
-    const q = questions[Math.floor(Math.random()*questions.length)];
-
-    document.getElementById("question").innerHTML =
-        `${q[0]} ${q[2]} ${q[1]} = ?`;
-
-    correctAnswer = q[2] === "+"
-        ? q[0]+q[1]
-        : q[0]-q[1];
-
-    document.getElementById("answer").value="";
-    document.getElementById("error").innerHTML="";
-}
-
-function checkAnswer(){
-
-    const value = Number(document.getElementById("answer").value);
-
-    if(value === correctAnswer){
-
-        window.location.href="https://phuclong.com.vn/";
-
-    }else{
-
-        document.getElementById("error").innerHTML="Sai rồi, vui lòng thử lại.";
-        generateQuestion();
-
+    // Bot thường sẽ điền vào ô này
+    if(honeypot.value.trim() !== ""){
+        alert("Xác minh thất bại.");
+        return;
     }
-}
 
-generateQuestion();
+    // Người dùng bình thường
+    window.location.href = "https://phuclong.com.vn/";
 
-document.getElementById("answer").addEventListener("keypress",function(e){
-    if(e.key==="Enter"){
-        checkAnswer();
-    }
 });
-
 </script>
 
 </body>
