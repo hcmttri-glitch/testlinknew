@@ -3,52 +3,60 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-const workerUrl = "https://recaptcha-worker.hcmttri.workers.dev";
+    const form = document.getElementById("verifyForm");
 
-document.getElementById("verifyForm").addEventListener("submit", async function(e){
-
-    e.preventDefault();
-
-    const honeypot = document.querySelector('input[name="website"]');
-
-    if(honeypot.value.trim() !== ""){
-        alert("Xác minh thất bại.");
+    // ⚠️ chống lỗi null
+    if (!form) {
+        console.error("Không tìm thấy form #verifyForm");
         return;
     }
 
-    grecaptcha.ready(function(){
+    const workerUrl = "https://recaptcha-worker.hcmttri.workers.dev";
 
-        grecaptcha.execute("6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh",{action:"submit"})
-        .then(async function(token){
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-            try{
+        const honeypot = document.querySelector('input[name="website"]');
 
-                const response = await fetch(workerUrl,{
-                    method:"POST",
-                    headers:{
-                        "Content-Type":"application/json"
-                    },
-                    body:JSON.stringify({token})
-                });
+        if (honeypot && honeypot.value.trim() !== "") {
+            alert("Xác minh thất bại.");
+            return;
+        }
 
-                const result = await response.json();
+        grecaptcha.ready(function () {
 
-                if(result.success){
-                    window.location.href="https://phuclong.com.vn/";
-                }else{
-                    alert("Google reCAPTCHA xác minh thất bại.");
+            grecaptcha.execute("6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh", {
+                action: "submit"
+            }).then(async function (token) {
+
+                try {
+
+                    const response = await fetch(workerUrl, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ token })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        window.location.href = "https://phuclong.com.vn/";
+                    } else {
+                        alert("Xác minh thất bại (reCAPTCHA).");
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    alert("Không thể kết nối server xác minh.");
                 }
 
-            }catch(err){
-                console.error(err);
-                alert("Không thể kết nối máy chủ.");
-            }
+            });
 
         });
 
     });
-
-});
 
 });
 </script>
