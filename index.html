@@ -17,9 +17,9 @@ body{
 }
 
 .box{
+    width:340px;
     background:#fff;
     padding:30px;
-    width:320px;
     border-radius:12px;
     box-shadow:0 10px 30px rgba(0,0,0,.15);
     text-align:center;
@@ -28,36 +28,34 @@ body{
 button{
     width:100%;
     padding:12px;
+    margin-top:15px;
     border:none;
     border-radius:8px;
-    background:#007bff;
+    background:#0d6efd;
     color:#fff;
     font-size:16px;
     cursor:pointer;
 }
 
 button:hover{
-    background:#0056b3;
+    background:#0b5ed7;
 }
 
 .hp{
-    position:absolute;
-    left:-9999px;
-    opacity:0;
+    display:none;
 }
 </style>
 
-<script src="https://www.google.com/recaptcha/api.js?render=6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 </head>
-
 <body>
 
 <div class="box">
 
 <h2>Xác minh</h2>
 
-<p>Nhấn nút bên dưới để tiếp tục.</p>
+<p>Vui lòng xác minh để tiếp tục.</p>
 
 <form id="verifyForm">
 
@@ -65,8 +63,12 @@ button:hover{
 type="text"
 name="website"
 class="hp"
-autocomplete="off"
-tabindex="-1">
+autocomplete="off">
+
+<div
+class="cf-turnstile"
+data-sitekey="0x4AAAAAADsl4IvSpU10Ie4W">
+</div>
 
 <button type="submit">
 Tiếp tục
@@ -78,47 +80,36 @@ Tiếp tục
 
 <script>
 
-document.addEventListener("DOMContentLoaded",function(){
-
 const workerUrl="https://recaptcha-worker.hcmttri.workers.dev";
 
-const form=document.getElementById("verifyForm");
-
-form.addEventListener("submit",async function(e){
+document.getElementById("verifyForm").addEventListener("submit",async function(e){
 
 e.preventDefault();
 
 const honeypot=document.querySelector('input[name="website"]');
 
-if(honeypot.value.trim()!==""){
+if(honeypot.value!==""){
 alert("Xác minh thất bại.");
 return;
 }
 
-grecaptcha.ready(function(){
+const token=document.querySelector('[name="cf-turnstile-response"]').value;
 
-grecaptcha.execute(
-"6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh",
-{
-action:"submit"
+if(!token){
+alert("Vui lòng hoàn thành xác minh.");
+return;
 }
-
-).then(async function(token){
 
 try{
 
 const response=await fetch(workerUrl,{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({
 token:token
 })
-
 });
 
 const result=await response.json();
@@ -129,7 +120,7 @@ window.location.href="https://phuclong.com.vn/";
 
 }else{
 
-alert("Google reCAPTCHA xác minh thất bại.");
+alert("Xác minh thất bại.");
 
 }
 
@@ -140,12 +131,6 @@ console.error(err);
 alert("Không thể kết nối máy chủ.");
 
 }
-
-});
-
-});
-
-});
 
 });
 
