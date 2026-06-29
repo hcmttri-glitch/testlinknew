@@ -1,13 +1,14 @@
 <script src="https://www.google.com/recaptcha/api.js?render=6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh"></script>
 
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+
 const workerUrl = "https://recaptcha-worker.hcmttri.workers.dev";
 
 document.getElementById("verifyForm").addEventListener("submit", async function(e){
 
     e.preventDefault();
 
-    // Honeypot
     const honeypot = document.querySelector('input[name="website"]');
 
     if(honeypot.value.trim() !== ""){
@@ -15,10 +16,9 @@ document.getElementById("verifyForm").addEventListener("submit", async function(
         return;
     }
 
-    // Lấy token từ Google
     grecaptcha.ready(function(){
 
-        grecaptcha.execute("6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh", {action:"submit"})
+        grecaptcha.execute("6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh",{action:"submit"})
         .then(async function(token){
 
             try{
@@ -28,34 +28,27 @@ document.getElementById("verifyForm").addEventListener("submit", async function(
                     headers:{
                         "Content-Type":"application/json"
                     },
-                    body:JSON.stringify({
-                        token:token
-                    })
+                    body:JSON.stringify({token})
                 });
 
                 const result = await response.json();
 
                 if(result.success){
-
                     window.location.href="https://phuclong.com.vn/";
-
                 }else{
-
                     alert("Google reCAPTCHA xác minh thất bại.");
-
                 }
 
             }catch(err){
-
                 console.error(err);
-
                 alert("Không thể kết nối máy chủ.");
-
             }
 
         });
 
     });
+
+});
 
 });
 </script>
