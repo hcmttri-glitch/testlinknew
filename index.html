@@ -1,62 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xác minh</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#f5f5f5;
+}
+
+.box{
+    background:#fff;
+    padding:30px;
+    width:320px;
+    border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+    text-align:center;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#007bff;
+    color:#fff;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0056b3;
+}
+
+.hp{
+    position:absolute;
+    left:-9999px;
+    opacity:0;
+}
+</style>
+
 <script src="https://www.google.com/recaptcha/api.js?render=6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh"></script>
 
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Xác minh</h2>
+
+<p>Nhấn nút bên dưới để tiếp tục.</p>
+
+<form id="verifyForm">
+
+<input
+type="text"
+name="website"
+class="hp"
+autocomplete="off"
+tabindex="-1">
+
+<button type="submit">
+Tiếp tục
+</button>
+
+</form>
+
+</div>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
 
-    const form = document.getElementById("verifyForm");
+document.addEventListener("DOMContentLoaded",function(){
 
-    // ⚠️ chống lỗi null
-    if (!form) {
-        console.error("Không tìm thấy form #verifyForm");
-        return;
-    }
+const workerUrl="https://recaptcha-worker.hcmttri.workers.dev";
 
-    const workerUrl = "https://recaptcha-worker.hcmttri.workers.dev";
+const form=document.getElementById("verifyForm");
 
-    form.addEventListener("submit", async function (e) {
-        e.preventDefault();
+form.addEventListener("submit",async function(e){
 
-        const honeypot = document.querySelector('input[name="website"]');
+e.preventDefault();
 
-        if (honeypot && honeypot.value.trim() !== "") {
-            alert("Xác minh thất bại.");
-            return;
-        }
+const honeypot=document.querySelector('input[name="website"]');
 
-        grecaptcha.ready(function () {
+if(honeypot.value.trim()!==""){
+alert("Xác minh thất bại.");
+return;
+}
 
-            grecaptcha.execute("6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh", {
-                action: "submit"
-            }).then(async function (token) {
+grecaptcha.ready(function(){
 
-                try {
+grecaptcha.execute(
+"6LcZUjstAAAAAGdxuoYFmT5j4uVDO7NGpHgG58Kh",
+{
+action:"submit"
+}
 
-                    const response = await fetch(workerUrl, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ token })
-                    });
+).then(async function(token){
 
-                    const result = await response.json();
+try{
 
-                    if (result.success) {
-                        window.location.href = "https://phuclong.com.vn/";
-                    } else {
-                        alert("Xác minh thất bại (reCAPTCHA).");
-                    }
+const response=await fetch(workerUrl,{
 
-                } catch (err) {
-                    console.error(err);
-                    alert("Không thể kết nối server xác minh.");
-                }
+method:"POST",
 
-            });
+headers:{
+"Content-Type":"application/json"
+},
 
-        });
-
-    });
+body:JSON.stringify({
+token:token
+})
 
 });
+
+const result=await response.json();
+
+if(result.success){
+
+window.location.href="https://phuclong.com.vn/";
+
+}else{
+
+alert("Google reCAPTCHA xác minh thất bại.");
+
+}
+
+}catch(err){
+
+console.error(err);
+
+alert("Không thể kết nối máy chủ.");
+
+}
+
+});
+
+});
+
+});
+
+});
+
 </script>
+
+</body>
+</html>
