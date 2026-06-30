@@ -2,137 +2,114 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Xác minh</title>
-
 <style>
 body{
-    margin:0;
-    font-family:Arial,sans-serif;
+    font-family:Arial;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
     background:#f5f5f5;
 }
-
 .box{
-    width:340px;
     background:#fff;
-    padding:30px;
-    border-radius:12px;
-    box-shadow:0 10px 30px rgba(0,0,0,.15);
+    padding:25px;
+    border-radius:10px;
+    width:320px;
     text-align:center;
 }
-
+input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+}
 button{
     width:100%;
-    padding:12px;
-    margin-top:15px;
-    border:none;
-    border-radius:8px;
-    background:#0d6efd;
-    color:#fff;
-    font-size:16px;
-    cursor:pointer;
+    padding:10px;
 }
-
-button:hover{
-    background:#0b5ed7;
-}
-
 .hp{
     display:none;
 }
 </style>
-
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
 </head>
 <body>
 
 <div class="box">
 
-<h2>Xác minh</h2>
+<h3>Xác minh người thật</h3>
 
-<p>Vui lòng xác minh để tiếp tục.</p>
+<div id="q"></div>
 
-<form id="verifyForm">
+<input type="number" id="ans" placeholder="Nhập đáp án">
 
-<input
-type="text"
-name="website"
-class="hp"
-autocomplete="off">
+<input type="text" id="website" class="hp">
 
-<div
-class="cf-turnstile"
-data-sitekey="0x4AAAAAADsl4IvSpU10Ie4W">
-</div>
+<button onclick="check()">Xác nhận</button>
 
-<button type="submit">
-Tiếp tục
-</button>
-
-</form>
+<p id="msg"></p>
 
 </div>
 
 <script>
 
-const workerUrl="https://recaptcha-worker.hcmttri.workers.dev";
+const start = Date.now();
 
-document.getElementById("verifyForm").addEventListener("submit",async function(e){
+const a = Math.floor(Math.random()*5)+1;
+const b = Math.floor(Math.random()*5)+1;
 
-e.preventDefault();
+let answer;
 
-const honeypot=document.querySelector('input[name="website"]');
+if(Math.random()>0.5){
 
-if(honeypot.value!==""){
-alert("Xác minh thất bại.");
-return;
-}
+    document.getElementById("q").innerHTML =
+    a + " c.ộ.n.g " + b + " =";
 
-const token=document.querySelector('[name="cf-turnstile-response"]').value;
-
-if(!token){
-alert("Vui lòng hoàn thành xác minh.");
-return;
-}
-
-try{
-
-const response=await fetch(workerUrl,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-token:token
-})
-});
-
-const result=await response.json();
-
-if(result.success){
-
-window.location.href="https://phuclong.com.vn/";
+    answer = a+b;
 
 }else{
 
-alert("Xác minh thất bại.");
+    const x = Math.max(a,b);
+    const y = Math.min(a,b);
+
+    document.getElementById("q").innerHTML =
+    x + " t.r.ừ " + y + " =";
+
+    answer = x-y;
 
 }
 
-}catch(err){
+function check(){
 
-console.error(err);
+    // Honeypot
+    if(document.getElementById("website").value!=""){
+        location.href="https://www.highlandscoffee.com.vn/";
+        return;
+    }
 
-alert("Không thể kết nối máy chủ.");
+    // Trả lời quá nhanh
+    if(Date.now()-start<2000){
+        location.href="https://www.highlandscoffee.com.vn/";
+        return;
+    }
+
+    if(Number(document.getElementById("ans").value)==answer){
+
+        location.href="https://phuclong.com.vn/";
+
+    }else{
+
+        document.getElementById("msg").innerHTML="Sai thông tin";
+
+        setTimeout(function(){
+
+            location.href="https://www.highlandscoffee.com.vn/";
+
+        },1000);
+
+    }
 
 }
-
-});
 
 </script>
 
