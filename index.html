@@ -2,114 +2,203 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Xác minh</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xác minh người thật</title>
+
 <style>
+*{
+    box-sizing:border-box;
+}
+
 body{
-    font-family:Arial;
+    margin:0;
+    background:#f5f5f5;
+    font-family:Arial,sans-serif;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
-    background:#f5f5f5;
 }
+
 .box{
+    width:340px;
     background:#fff;
     padding:25px;
-    border-radius:10px;
-    width:320px;
+    border-radius:12px;
+    box-shadow:0 5px 20px rgba(0,0,0,.15);
     text-align:center;
 }
-input{
-    width:100%;
-    padding:10px;
-    margin:10px 0;
+
+#question{
+    font-size:24px;
+    font-weight:bold;
+    margin:20px 0;
+    user-select:none;
 }
+
+input[type=number]{
+    width:100%;
+    padding:12px;
+    font-size:18px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
 button{
     width:100%;
-    padding:10px;
+    margin-top:15px;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#0066ff;
+    color:#fff;
+    font-size:16px;
+    cursor:pointer;
 }
+
+button:hover{
+    background:#0050cc;
+}
+
+#msg{
+    margin-top:15px;
+    color:red;
+    font-weight:bold;
+}
+
 .hp{
     display:none;
 }
 </style>
 </head>
+
 <body>
 
 <div class="box">
 
-<h3>Xác minh người thật</h3>
+<h2>Xác minh người thật</h2>
 
-<div id="q"></div>
+<div id="question"></div>
 
-<input type="number" id="ans" placeholder="Nhập đáp án">
+<input
+id="answer"
+type="number"
+placeholder="Nhập đáp án">
 
-<input type="text" id="website" class="hp">
+<input
+class="hp"
+id="website"
+type="text"
+autocomplete="off">
 
-<button onclick="check()">Xác nhận</button>
+<button onclick="checkAnswer()">
+Xác nhận
+</button>
 
-<p id="msg"></p>
+<div id="msg"></div>
 
 </div>
 
 <script>
 
-const start = Date.now();
+const startTime = Date.now();
 
-const a = Math.floor(Math.random()*5)+1;
-const b = Math.floor(Math.random()*5)+1;
+const invisible = "\u2060";
 
-let answer;
+function hideWord(word){
 
-if(Math.random()>0.5){
+    const marks=[
+        ".",
+        "-",
+        "•",
+        "_",
+        "~",
+        ",",
+        "*",
+        "·"
+    ];
 
-    document.getElementById("q").innerHTML =
-    a + " c.ộ.n.g " + b + " =";
+    const mark=marks[Math.floor(Math.random()*marks.length)];
 
-    answer = a+b;
-
-}else{
-
-    const x = Math.max(a,b);
-    const y = Math.min(a,b);
-
-    document.getElementById("q").innerHTML =
-    x + " t.r.ừ " + y + " =";
-
-    answer = x-y;
+    return word.split("").join(mark+invisible);
 
 }
 
-function check(){
+let a=Math.floor(Math.random()*8)+1;
+let b=Math.floor(Math.random()*8)+1;
 
-    // Honeypot
+let answer;
+let text;
+
+if(Math.random()>0.5){
+
+    answer=a+b;
+
+    text=a+hideWord("cộng")+b+"=";
+
+}else{
+
+    if(a<b){
+        let t=a;
+        a=b;
+        b=t;
+    }
+
+    answer=a-b;
+
+    text=a+hideWord("trừ")+b+"=";
+
+}
+
+document.getElementById("question").textContent=text;
+
+function fail(){
+
+    document.getElementById("msg").innerHTML="Sai thông tin! Đang chuyển hướng...";
+
+    setTimeout(function(){
+
+        location.href="https://www.highlandscoffee.com.vn/";
+
+    },1500);
+
+}
+
+function checkAnswer(){
+
     if(document.getElementById("website").value!=""){
-        location.href="https://www.highlandscoffee.com.vn/";
+        fail();
         return;
     }
 
-    // Trả lời quá nhanh
-    if(Date.now()-start<2000){
-        location.href="https://www.highlandscoffee.com.vn/";
+    if(Date.now()-startTime<2000){
+        fail();
         return;
     }
 
-    if(Number(document.getElementById("ans").value)==answer){
+    let user=Number(document.getElementById("answer").value);
+
+    if(user===answer){
 
         location.href="https://phuclong.com.vn/";
 
     }else{
 
-        document.getElementById("msg").innerHTML="Sai thông tin";
-
-        setTimeout(function(){
-
-            location.href="https://www.highlandscoffee.com.vn/";
-
-        },1000);
+        fail();
 
     }
 
 }
+
+document.getElementById("answer").addEventListener("keydown",function(e){
+
+    if(e.key==="Enter"){
+
+        checkAnswer();
+
+    }
+
+});
 
 </script>
 
