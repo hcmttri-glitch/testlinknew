@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: moc-1992-analytics
+    runtime: node
+    plan: 0.5c-512mb
+    region: singapore
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /login
+    autoDeployTrigger: off
+    disk:
+      name: app-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /var/data/moc-analytics.sqlite
+      - key: TRUST_PROXY
+        value: "1"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_SETUP_KEY
+        generateValue: true
