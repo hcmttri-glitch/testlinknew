@@ -1,33 +1,56 @@
-# Mộc 1992 TikTok Analytics
+# Mộc 1992 Social Hub
 
-Bản xem trước hiện chỉ dùng dữ liệu minh họa. Ứng dụng có đăng nhập phía máy chủ; không xuất bản trang HTML tĩnh để bảo vệ dashboard.
+Hệ thống nội bộ để quản lý nhiều kênh mạng xã hội của Mộc 1992 trên một dashboard.
+
+## Chức năng hiện có
+
+- Đăng nhập phía máy chủ; không có đăng ký công khai.
+- Quản lý nhiều tài khoản TikTok, Facebook, Instagram, Threads và YouTube.
+- Ghi nhận người phụ trách, username, tên hiển thị và đường dẫn kênh.
+- Lưu báo cáo chỉ số theo ngày: follower, views, reach, likes, comments, shares, saves, số bài đăng và clicks.
+- Lưu bài đăng/video kèm ngày đăng, đường dẫn, người phụ trách và chỉ số hiệu quả.
+- Lọc danh sách, xem lịch sử và xuất báo cáo CSV.
+- Dữ liệu lưu trong SQLite trên máy chủ.
+- Vai trò admin được thêm/sửa/xóa kênh và nhập báo cáo. Vai trò viewer chỉ được xem.
+
+## Giới hạn tích hợp dữ liệu
+
+Dashboard hiện **chưa tự động kết nối API** của TikTok, Meta, Threads hoặc YouTube. Các số liệu trong dashboard là số liệu do người dùng được cấp quyền nhập vào hoặc dữ liệu nhập từ quy trình khác. Không có số liệu minh họa mặc định.
+
+Để tự động đồng bộ, cần triển khai và kiểm thử tích hợp riêng cho từng nền tảng, đăng ký ứng dụng/API tương ứng, xin đúng quyền truy cập và lưu token bí mật ở biến môi trường hoặc kho bí mật. Không đưa access token, client secret, mật khẩu hoặc mã thiết lập vào mã nguồn GitHub.
 
 ## Đăng nhập và tài khoản
 
-- Không có đăng ký công khai. Quản trị viên tạo tài khoản từ dòng lệnh.
+- Không có đăng ký công khai.
 - Mật khẩu được băm Argon2id; mật khẩu gốc không được lưu.
-- Phiên đăng nhập được lưu trong SQLite, thời hạn nhàn rỗi tối đa 8 giờ, cookie `HttpOnly`, `SameSite=Strict` và bật `Secure` trong môi trường production.
-- Các thao tác POST dùng CSRF token. Đăng nhập bị giới hạn số lần thử.
-- Người có quyền `admin` hoặc `viewer` đều được xem dashboard ở bản khung này; quản lý người dùng hiện qua lệnh quản trị.
+- Phiên đăng nhập lưu trong SQLite, thời hạn nhàn rỗi tối đa 8 giờ, cookie `HttpOnly`, `SameSite=Strict` và bật `Secure` trong production.
+- Các thao tác POST/PATCH/DELETE dùng CSRF token. Đăng nhập bị giới hạn số lần thử.
+- Tài khoản admin đầu tiên được tạo tại `/setup`; sau khi tạo thành công, trang thiết lập tự khóa.
+- Tạo viewer từ terminal bằng `npm run admin:create -- viewer@example.com viewer`. Công cụ sẽ yêu cầu nhập mật khẩu trong terminal.
 
 ## Chạy trên máy phát triển
 
-Yêu cầu Node.js 20 trở lên và một máy chủ có thể lưu tệp SQLite bền vững.
+Yêu cầu Node.js 20 trở lên và nơi lưu trữ có thể giữ tệp SQLite.
 
 1. Cài dependency: `npm install`.
-2. Sao chép `.env.example` thành `.env`, rồi đặt `SESSION_SECRET` và `ADMIN_SETUP_KEY` thành hai chuỗi ngẫu nhiên khác nhau, mỗi chuỗi dài ít nhất 32 ký tự.
-3. Khởi chạy: `npm start`.
-4. Mở `http://localhost:3000/setup`, nhập mã khởi tạo, email và mật khẩu quản trị. Sau lần tạo tài khoản đầu tiên, trang thiết lập tự khóa.
-5. Đăng nhập tại `http://localhost:3000/login`.
-
-Tạo thêm tài khoản viewer từ terminal bằng `npm run admin:create -- viewer@example.com viewer`. Mật khẩu được nhập kín trong terminal và cần dài ít nhất 12 ký tự. Không có đăng ký công khai.
-
-Trong production, bắt buộc dùng HTTPS và `NODE_ENV=production`. Cấu hình `TRUST_PROXY` đúng theo số proxy tin cậy của nhà cung cấp. Dùng nơi lưu trữ có ổ đĩa bền vững; không dùng SQLite trên môi trường mà tệp bị xóa khi khởi động lại hoặc có nhiều replica ghi đồng thời.
+2. Sao chép `.env.example` thành `.env`.
+3. Đặt `SESSION_SECRET` và `ADMIN_SETUP_KEY` thành hai chuỗi ngẫu nhiên khác nhau, mỗi chuỗi dài ít nhất 32 ký tự.
+4. Khởi chạy: `npm start`.
+5. Mở `http://localhost:3000/setup`, nhập mã khởi tạo, email và mật khẩu quản trị.
+6. Đăng nhập tại `http://localhost:3000/login`.
 
 ## Triển khai
 
-GitHub Pages không thể chạy middleware đăng nhập phía máy chủ. Repo hiện công khai và có một trang `index.html` cũ độc lập; không bật GitHub Pages để bảo vệ dashboard. Tệp `render.yaml` chuẩn bị cấu hình một dịch vụ Node tại Singapore trên Render với ổ lưu bền vững 1 GB. Tạo dịch vụ từ Blueprint sẽ phát sinh phí; xác nhận giá hiện tại trong Render trước khi tạo.
+Ứng dụng chạy bằng Node.js/Express nên GitHub Pages không thể chạy chức năng đăng nhập và API. Tệp `render.yaml` hiện chuẩn bị cấu hình dịch vụ Node trên Render kèm ổ lưu bền vững; việc tạo hoặc triển khai dịch vụ có thể phát sinh phí. Kiểm tra giá và cấu hình hiện hành của nhà cung cấp trước khi triển khai.
 
-Sau khi dịch vụ lên, lấy giá trị `ADMIN_SETUP_KEY` trong phần Environment của dịch vụ và mở `/setup` trên URL do Render cấp để tạo tài khoản chủ sở hữu. Mã thiết lập không cần gửi cho người khác. Sau khi tạo tài khoản, `/setup` trả về 404. Cấu hình tắt tự động triển khai theo commit; chỉ deploy khi bạn chủ động chọn trong Render.
+Trong production:
+- Bắt buộc dùng HTTPS và `NODE_ENV=production`.
+- Cấu hình `TRUST_PROXY` đúng với số proxy tin cậy của nhà cung cấp.
+- Dùng ổ lưu trữ bền vững cho SQLite; không dùng filesystem tạm thời.
+- Giữ `SESSION_SECRET` và `ADMIN_SETUP_KEY` trong phần secrets/environment của hosting.
+- Không bật GitHub Pages cho repository này; trang dashboard cần chạy qua Express để được bảo vệ đăng nhập.
 
-Chưa có dữ liệu TikTok thật, backend lấy dữ liệu TikTok, OAuth Zalo, hay gửi báo cáo tự động. Tất cả chỉ số trên dashboard hiện là mẫu. Dịch vụ Render nhỏ nhất hiện niêm yết khoảng 7 USD/tháng và ổ lưu 1 GB khoảng 0,25 USD/tháng, trước mọi khoản vượt hạn mức; giá có thể thay đổi.
+## Khuyến nghị vận hành
+
+Mỗi kênh nên có người phụ trách và cập nhật số liệu cùng một thời điểm mỗi ngày/tuần. Khi số liệu cùng kênh và cùng ngày được nhập lại, bản ghi báo cáo sẽ được cập nhật thay vì tạo bản trùng. Xuất CSV định kỳ để lưu trữ và đối chiếu.
+
