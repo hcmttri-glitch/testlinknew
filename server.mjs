@@ -34,6 +34,7 @@ const db = new sqlite3.Database(databasePath);
 await new Promise((resolve, reject) => {
   db.exec(`
     PRAGMA journal_mode = WAL;
+    PRAGMA foreign_keys = ON;
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE COLLATE NOCASE,
       password_hash TEXT NOT NULL, role TEXT NOT NULL CHECK (role IN ('admin', 'viewer')),
@@ -108,6 +109,10 @@ async function findUser(request) {
   if (!request.session.userId) return null;
   return get('SELECT id,email,role FROM users WHERE id=? AND disabled_at IS NULL', [request.session.userId]);
 }
+function requireAdmin(request, response) {
+  if (response.locals.user?.role !== 'admin') { response.status(403).json({ error: 'Tài khoản chỉ được xem. Hãy nhờ quản trị viên cấp quyền nhập liệu.' }); return false; }
+  return true;
+}
 app.get('/login', async (req, res) => {
   if (await findUser(req)) return res.redirect('/');
   res.type('html').send(loginPage(req));
@@ -170,6 +175,7 @@ app.get('/api/bootstrap', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 app.post('/api/accounts', async (req, res, next) => {
+  if (!requireAdmin(req, res)) return;
   try {
     const platform = String(req.body.platform || ''), handle = String(req.body.handle || '').trim().replace(/^@/, '');
     const displayName = String(req.body.displayName || handle).trim();
@@ -185,6 +191,7 @@ app.post('/api/accounts', async (req, res, next) => {
   }
 });
 app.patch('/api/accounts/:id', async (req, res, next) => {
+  if (!requireAdmin(req, res)) return;
   try {
     const status = String(req.body.status || '');
     if (!['active','paused'].includes(status)) return res.status(400).json({ error: 'Trạng thái không hợp lệ.' });
@@ -194,6 +201,7 @@ app.patch('/api/accounts/:id', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 app.delete('/api/accounts/:id', async (req, res, next) => {
+  if (!requireAdmin(req, res)) return;
   try {
     const account = await get('SELECT id FROM social_accounts WHERE id=?', [req.params.id]);
     if (!account) return res.status(404).json({ error: 'Không tìm thấy kênh.' });
@@ -202,6 +210,7 @@ app.delete('/api/accounts/:id', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 app.post('/api/metrics', async (req, res, next) => {
+  if (!requireAdmin(req, res)) return;
   try {
     const accountId = String(req.body.accountId || ''), date = String(req.body.reportDate || '');
     const account = await get('SELECT id FROM social_accounts WHERE id=?', [accountId]);
@@ -219,6 +228,7 @@ app.post('/api/metrics', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 app.post('/api/posts', async (req, res, next) => {
+  if (!requireAdmin(req, res)) return;
   try {
     const accountId = String(req.body.accountId || ''), title = String(req.body.title || '').trim();
     const account = await get('SELECT id FROM social_accounts WHERE id=?', [accountId]);
