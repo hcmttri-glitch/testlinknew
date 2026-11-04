@@ -127,7 +127,7 @@ app.post('/setup', setupLimiter, async (req, res, next) => {
     const admin = await get("SELECT id FROM users WHERE role='admin' AND disabled_at IS NULL LIMIT 1");
     if (admin || !safeEqual(req.body.setupKey, process.env.ADMIN_SETUP_KEY)) return res.status(404).type('text').send('Không tìm thấy trang.');
     const email = String(req.body.email || '').trim().toLowerCase(), password = String(req.body.password || '');
-    if (!/^\\S+@\\S+\\.\\S+$/.test(email) || password.length < 12 || password.length > 128) return res.status(400).type('html').send(setupPage(req, 'Kiểm tra email và mật khẩu.'));
+    if (!/^\S+@\S+\.\S+$/.test(email) || password.length < 12 || password.length > 128) return res.status(400).type('html').send(setupPage(req, 'Kiểm tra email và mật khẩu.'));
     const hash = await argon2.hash(password, { type: argon2.argon2id });
     await run('INSERT INTO users (id,email,password_hash,role) VALUES (?,?,?,?)', [crypto.randomUUID(), email, hash, 'admin']);
     res.redirect(303, '/login');
@@ -215,7 +215,7 @@ app.post('/api/metrics', async (req, res, next) => {
     const accountId = String(req.body.accountId || ''), date = String(req.body.reportDate || '');
     const account = await get('SELECT id FROM social_accounts WHERE id=?', [accountId]);
     if (!account) return res.status(404).json({ error: 'Kênh không tồn tại.' });
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) return res.status(400).json({ error: 'Ngày báo cáo không hợp lệ.' });
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) return res.status(400).json({ error: 'Ngày báo cáo không hợp lệ.' });
     const fields = ['followers','views','reach','likes','comments','shares','saves','posts','clicks'];
     const values = fields.map(key => Number(req.body[key] || 0));
     if (values.some(n => !Number.isSafeInteger(n) || n < 0 || n > 1000000000000)) return res.status(400).json({ error: 'Chỉ số phải là số nguyên không âm hợp lệ.' });
@@ -235,7 +235,7 @@ app.post('/api/posts', async (req, res, next) => {
     const date = String(req.body.publishedAt || '');
     const url = String(req.body.postUrl || '').trim(), owner = String(req.body.owner || '').trim();
     const numbers = ['views','likes','comments','shares'].map(k=>Number(req.body[k]||0));
-    if (!account || !title || title.length > 240 || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || numbers.some(n=>!Number.isSafeInteger(n)||n<0) || (url && !/^https:\/\//i.test(url))) return res.status(400).json({ error: 'Kiểm tra lại thông tin bài đăng.' });
+    if (!account || !title || title.length > 240 || !/^\d{4}-\d{2}-\d{2}$/.test(date) || numbers.some(n=>!Number.isSafeInteger(n)||n<0) || (url && !/^https:\/\//i.test(url))) return res.status(400).json({ error: 'Kiểm tra lại thông tin bài đăng.' });
     await run('INSERT INTO social_posts (id,account_id,post_url,title,published_at,views,likes,comments,shares,owner) VALUES (?,?,?,?,?,?,?,?,?,?)',
       [crypto.randomUUID(),accountId,url,title,date,...numbers,owner]);
     res.status(201).json({ ok: true });
